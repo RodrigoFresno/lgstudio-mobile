@@ -1,0 +1,125 @@
+.panel {
+  position: fixed;
+  z-index: 30;
+  top: 142px;
+  left: 16px;
+  width: 286px;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  padding: 14px;
+  color: #edf3ff;
+  background: rgba(9, 17, 35, 0.92);
+  border: 1px solid rgba(190, 213, 255, 0.18);
+  border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.38), inset 0 1px rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(22px) saturate(145%);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  scrollbar-color: rgba(132, 166, 220, 0.45) transparent;
+  scrollbar-width: thin;
+}
+
+.dragHandle { display: none; }
+.panelHeader { display: flex; align-items: flex-start; justify-content: space-between; padding: 1px 1px 12px; border-bottom: 1px solid rgba(255,255,255,.10); }
+.panelHeader > div { display: flex; flex-direction: column; gap: 3px; }
+.panelHeader strong { font-size: 17px; letter-spacing: .2px; }
+.panelHeader span:not(.liveDot) { color: #96a8c6; font-size: 10px; }
+.liveDot { color: #9fe7c4; font-size: 9px; font-weight: 800; letter-spacing: 1px; padding: 4px 6px; border: 1px solid rgba(119, 226, 172, .35); border-radius: 20px; background: rgba(58, 168, 115, .12); }
+.section { padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,.09); }
+.sectionTitle { margin-bottom: 9px; color: #91a8cb; font-size: 9px; font-weight: 800; letter-spacing: 1.15px; }
+.buttonGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.choiceButton, .modeButton { border: 1px solid rgba(176, 199, 235, .17); border-radius: 8px; background: rgba(255,255,255,.045); color: #d8e4f9; cursor: pointer; transition: .15s ease; }
+.choiceButton { min-height: 53px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10px; }
+.choiceButton:hover, .modeButton:hover { background: rgba(92, 145, 226, .17); border-color: rgba(132, 179, 255, .45); }
+.choiceButton.active, .modeButton.active { color: white; background: rgba(48, 126, 237, .23); border-color: #579bff; box-shadow: inset 0 0 0 1px rgba(87,155,255,.2); }
+.shapeGlyph { font-size: 19px; line-height: 19px; color: #b9d8ff; }
+.twoColumns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-top: 11px; color: #b6c5dc; font-size: 10px; }
+.field > span { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.field b { color: #eff5ff; font-variant-numeric: tabular-nums; font-weight: 600; }
+.field input[type='range'] { width: 100%; accent-color: #4597ff; cursor: pointer; }
+.field input[type='range']:disabled { opacity: .35; cursor: not-allowed; }
+.field select { width: 100%; color: #e9f1ff; background: #18243a; border: 1px solid rgba(176,199,235,.2); border-radius: 7px; padding: 8px; outline: none; }
+.modeGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.modeButton { min-height: 34px; padding: 5px 7px; font-size: 10px; }
+.modeButton:last-child { grid-column: 1 / -1; }
+.hint { margin: 8px 0 0; color: #879ab8; font-size: 10px; line-height: 1.45; }
+.hiddenInput { display: none; }
+.uploadButton { display: flex; width: 100%; align-items: center; justify-content: center; gap: 8px; padding: 10px; color: #e6f1ff; background: rgba(62, 128, 220, .18); border: 1px solid rgba(101, 164, 255, .45); border-radius: 8px; cursor: pointer; font-size: 11px; }
+.uploadButton:hover { background: rgba(62, 128, 220, .3); }
+.uploadIcon { font-size: 17px; line-height: 10px; }
+.fileRow { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; color: #899bb8; font-size: 10px; }
+.fileRow > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.removeButton { flex-shrink: 0; color: #ffacb4; background: transparent; border: 0; cursor: pointer; font-size: 10px; }
+.colorRow { display: flex; align-items: center; gap: 9px; color: #e8f0ff; font-size: 10px; }
+.colorRow input { width: 35px; height: 27px; border: 1px solid rgba(176,199,235,.25); border-radius: 6px; padding: 2px; background: transparent; cursor: pointer; }
+.exportSection { padding-top: 13px; }
+.exportButton { width: 100%; margin-top: 12px; padding: 11px; color: #fff; background: linear-gradient(135deg, #287be6, #5c8dff); border: 1px solid rgba(169, 202, 255, .55); border-radius: 8px; box-shadow: 0 5px 16px rgba(30, 101, 219, .25); cursor: pointer; font-size: 11px; font-weight: 750; }
+.exportButton:hover:not(:disabled) { filter: brightness(1.12); }
+.exportButton:disabled { opacity: .65; cursor: wait; }
+
+@media (max-width: 900px) {
+  .panel { top: 155px; width: 248px; left: 8px; max-height: calc(100vh - 170px); }
+}
+
+
+@media (max-width: 760px) {
+  .panel {
+    top: auto;
+    left: 8px;
+    right: 8px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    transform: translate3d(0, var(--panel-drag-y, 0px), 0);
+    will-change: transform;
+    width: auto;
+    max-height: min(38dvh, 340px);
+    padding: 8px 12px calc(12px + env(safe-area-inset-bottom));
+    border-radius: 16px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    z-index: 40;
+    font-size: 12px;
+    box-shadow: 0 -12px 36px rgba(0,0,0,.42), 0 0 0 1px rgba(128,174,255,.08);
+    transition: box-shadow .18s ease;
+  }
+
+  .dragHandle {
+    display: flex;
+    width: 100%;
+    height: 28px;
+    align-items: center;
+    justify-content: center;
+    margin: -3px 0 4px;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .dragHandle:active { cursor: grabbing; }
+  .dragHandle span {
+    display: block;
+    width: 42px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(218, 230, 250, .55);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+  }
+  .panelHeader { padding-bottom: 8px; }
+  .panelHeader strong { font-size: 15px; }
+  .section { padding: 9px 0; }
+  .sectionTitle { margin-bottom: 7px; }
+  .choiceButton { min-height: 44px; }
+  .field input[type='range'] { min-height: 28px; }
+  .uploadButton, .exportButton, .modeButton, .choiceButton,
+  .removeButton, .field select {
+    min-height: 42px;
+    touch-action: manipulation;
+  }
+  .twoColumns { gap: 10px; }
+}
+
+@media (max-width: 380px) {
+  .panel { max-height: 36dvh; padding-left: 9px; padding-right: 9px; }
+  .panelHeader span:not(.liveDot) { font-size: 9px; }
+}
