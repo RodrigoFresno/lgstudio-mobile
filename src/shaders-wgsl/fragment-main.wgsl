@@ -231,11 +231,11 @@ fn fs_main(@builtin(position) frag_coord: vec4f, @location(0) v_uv: vec2f) -> @l
   outColor = mix(outColor, textureSampleLevel(u_bg, u_sampler, v_uv, 0.0), smoothstep(-0.001, 0.001, merged));
 
   if (u.u_exportTransparent == 1) {
-    // Preview glare must not turn empty transparent pixels opaque.
-    let artworkCoverage = textureSampleLevel(u_blurredBg, u_sampler, v_uv, 0.0).a;
-    let exportAlpha = min(outColor.a, artworkCoverage);
+    // Preserve alpha from the glass SDF/refraction composition.
+    // Clamping to blurred-artwork alpha erases Fresnel, glare and the glass rim.
+    // The background pass already has zero alpha outside the icon silhouette.
     // WebGPU canvas alphaMode is premultiplied.
-    return vec4f(outColor.rgb * exportAlpha, exportAlpha);
+    return vec4f(outColor.rgb * outColor.a, outColor.a);
   }
   return outColor;
 }
