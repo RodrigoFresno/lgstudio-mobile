@@ -492,7 +492,8 @@ function App() {
       // bgType 0 is the checkerboard transparency preview. During export,
       // replace that preview with a clean white backing; the silhouette mask
       // below converts everything outside the icon into real PNG alpha.
-      // Export always ignores preview backgrounds, regardless of the selected thumbnail.\n      stateRef.current.activeRenderer?.setUniform('u_exportTransparent', 1);
+      // Export always ignores preview backgrounds, regardless of the selected thumbnail.
+      stateRef.current.activeRenderer?.setUniform('u_exportTransparent', 1);
       const centered = { x: exportSize / 2, y: exportSize / 2 };
       shapePositionRef.current = centered;
       setShapePosition(centered);
@@ -500,7 +501,14 @@ function App() {
       stateRef.current.canvasPointerPos = pointer;
       stateRef.current.mouseSpring.set(pointer);
       setCanvasInfo({ width: exportSize, height: exportSize, dpr: 1 });
-      await waitForFrames(4);\n      // Wait for GPU work to finish before reading the canvas. This avoids\n      // capturing an unfinished/black frame at high resolutions.\n      if (stateRef.current.rendererBackend === 'webgpu') {\n        await stateRef.current.gpuDevice?.queue.onSubmittedWorkDone();\n      } else {\n        canvasEl.getContext('webgl2')?.finish();\n      }
+      await waitForFrames(4);
+      // Wait for GPU work to finish before reading the canvas. This avoids
+      // capturing an unfinished/black frame at high resolutions.
+      if (stateRef.current.rendererBackend === 'webgpu') {
+        await stateRef.current.gpuDevice?.queue.onSubmittedWorkDone();
+      } else {
+        canvasEl.getContext('webgl2')?.finish();
+      }
 
       const output = document.createElement('canvas');
       output.width = exportSize;
