@@ -43,7 +43,7 @@ export const PresetControls = ({ controls, controlsAPI, lang }: PresetControlsPr
       }
       alert(lang['editor.importSuccessMessage']);
     } catch (err) {
-      alert(lang['editor.importFailedMessage'](err instanceof Error ? err.message : 'Unknown error'));
+      alert(lang['editor.importFailedMessage'](err instanceof Error ? err.message : 'Erro desconhecido'));
     }
 
     if (fileInputRef.current) {
@@ -53,12 +53,12 @@ export const PresetControls = ({ controls, controlsAPI, lang }: PresetControlsPr
 
   return (
     <div className={styles.presetControls}>
-      <LevaButton onClick={handleExport} title="Export current preset">
+      <LevaButton onClick={handleExport} title="Exportar predefinição atual">
         <FileDownloadOutlinedIcon style={{ fontSize: '14px', marginRight: '4px' }} />
         {lang['editor.export'] || 'Export'}
       </LevaButton>
 
-      <LevaButton onClick={handleImportClick} title="Import preset from file">
+      <LevaButton onClick={handleImportClick} title="Importar predefinição de um arquivo">
         <FileUploadOutlinedIcon style={{ fontSize: '14px', marginRight: '4px' }} />
         {lang['editor.import'] || 'Import'}
       </LevaButton>
