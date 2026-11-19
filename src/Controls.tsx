@@ -217,7 +217,7 @@ export const useLevaControls = ({
       }),
       ['debugSettings']: folder({
         step: {
-          label: 'Show Step',
+          label: 'Etapa de diagnóstico',
           value: 9,
           min: 0,
           max: 9,
@@ -231,7 +231,7 @@ export const useLevaControls = ({
   );
 
   useLayoutEffect(() => {
-    const levaRoot = document.querySelector('#root>[class^=leva]');
+    const levaRoot = document.querySelector('.settingsDock [class^=leva]');
     if (!levaRoot) {
       return;
     }
