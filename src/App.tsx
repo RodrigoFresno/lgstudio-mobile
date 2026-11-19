@@ -831,14 +831,22 @@ function App() {
         lastState.canvasInfo.height !== canvasInfo.height ||
         lastState.canvasInfo.dpr !== canvasInfo.dpr
       ) {
+        // Resize the actual drawing buffer as well as the multipass
+        // framebuffers. Resizing only the internal passes leaves the visible
+        // canvas at preview resolution, which then gets stretched during PNG
+        // export and destroys the Liquid Glass edge/refraction detail.
+        const targetWidth = Math.max(1, Math.round(canvasInfo.width * canvasInfo.dpr));
+        const targetHeight = Math.max(1, Math.round(canvasInfo.height * canvasInfo.dpr));
+        if (canvasEl.width !== targetWidth) canvasEl.width = targetWidth;
+        if (canvasEl.height !== targetHeight) canvasEl.height = targetHeight;
         if (backend === 'webgl') {
           const gl = canvasEl.getContext('webgl2');
           if (gl) {
-            gl.viewport(0, 0, Math.round(canvasInfo.width * canvasInfo.dpr), Math.round(canvasInfo.height * canvasInfo.dpr));
+            gl.viewport(0, 0, targetWidth, targetHeight);
           }
         }
-        renderer.resize(canvasInfo.width * canvasInfo.dpr, canvasInfo.height * canvasInfo.dpr);
-        renderer.setUniform('u_resolution', [canvasInfo.width * canvasInfo.dpr, canvasInfo.height * canvasInfo.dpr]);
+        renderer.resize(targetWidth, targetHeight);
+        renderer.setUniform('u_resolution', [targetWidth, targetHeight]);
       }
 
       // Texture management
