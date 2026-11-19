@@ -77,6 +77,7 @@ void main() {
   vec2 u_resolution1x = u_resolution.xy / u_dpr;
   // float chessboardBg = chessboard(gl_FragCoord.xy, 14.0);
   vec3 bgColor = vec3(1.0);
+  float bgAlpha = 0.0;
 
   if (u_exportTransparent == 1) {
     // Export mode: ignore every preview background and keep only the glass/shadow.
@@ -127,6 +128,7 @@ void main() {
       float glassMask = 1.0 - smoothstep(-shapeEdgeAa, shapeEdgeAa, shapeDistance);
       float artworkAlpha = iconPixel.a * clamp(u_iconOpacity, 0.0, 1.0) * glassMask;
       bgColor = mix(bgColor, iconPixel.rgb, artworkAlpha);
+      bgAlpha = artworkAlpha;
     }
   }
 
@@ -144,7 +146,7 @@ void main() {
   float shadow = exp(-1.0 / u_shadowExpand * abs(merged) * u_resolution1x.y) * 0.6 * u_shadowFactor;
 
   if (u_exportTransparent == 1) {
-    fragColor = vec4(bgColor, 0.0);
+    fragColor = vec4(bgColor, bgAlpha);
   } else {
     fragColor = vec4(bgColor - vec3(shadow), 1.0);
   }
