@@ -237,13 +237,13 @@ export const useLevaControls = ({
     }
 
     setTimeout(() => {
-      const controlEls = (levaRoot.lastChild as HTMLDivElement).querySelectorAll('&>div>div');
+      const controlEls = (levaRoot.lastChild as HTMLDivElement).querySelectorAll(':scope > div > div');
       controlEls.forEach((el) => {
         const ctrlEl = el as HTMLDivElement;
         const styleStr = ctrlEl.getAttribute('style');
         if (styleStr && styleStr.includes('folder')) {
           // get title str:
-          const titleEl = ctrlEl.querySelector('&>div>svg+div') as HTMLDivElement;
+          const titleEl = ctrlEl.querySelector(':scope > div > svg + div') as HTMLDivElement;
           if (!titleEl) {
             return;
           }
