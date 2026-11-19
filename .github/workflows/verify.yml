@@ -1,4 +1,5 @@
 name: Verificar compilação do lgStudio
+# Executa novamente após os ajustes de transparência e interface.
 
 on:
   pull_request:
