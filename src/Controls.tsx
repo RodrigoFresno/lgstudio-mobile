@@ -7,15 +7,9 @@ import languages from './utils/languages';
 
 export const useLevaControls = ({
   containerRender,
-  rendererOptions,
 }: {
   containerRender: {
     bgType: (props: { value: number; setValue: (v: number) => void }) => React.ReactNode;
-  };
-  rendererOptions?: {
-    webgpuSupported: boolean;
-    webgpuUnavailableReason?: string;
-    onRendererChange?: (backend: 'webgl' | 'webgpu') => void;
   };
 }) => {
   const langName = 'pt-BR' as const;
