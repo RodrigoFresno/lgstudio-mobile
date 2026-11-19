@@ -144,7 +144,7 @@ void main() {
   float shadow = exp(-1.0 / u_shadowExpand * abs(merged) * u_resolution1x.y) * 0.6 * u_shadowFactor;
 
   if (u_exportTransparent == 1) {
-    fragColor = vec4(vec3(0.0), clamp(shadow, 0.0, 1.0));
+    fragColor = vec4(bgColor, 0.0);
   } else {
     fragColor = vec4(bgColor - vec3(shadow), 1.0);
   }
