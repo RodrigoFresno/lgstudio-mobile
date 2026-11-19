@@ -585,7 +585,12 @@ void main() {
   }
 
   if (u_exportTransparent == 1) {
-    // WebGL canvases use premultiplied alpha; keep exported pixels valid.
+    // Glass highlights/refraction may mix in opaque white for the on-screen
+    // preview. In a transparent PNG, those highlights must never create
+    // opaque pixels where the blurred artwork has no coverage.
+    float artworkCoverage = texture(u_blurredBg, v_uv).a;
+    outColor.a = min(outColor.a, artworkCoverage);
+    // WebGL's drawing buffer is premultiplied-alpha.
     outColor.rgb *= outColor.a;
   }
   fragColor = outColor;
