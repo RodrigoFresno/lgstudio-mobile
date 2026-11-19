@@ -15,3 +15,11 @@
 - Removido o limite de alfa baseado na textura borrada, que apagava a refração, o Fresnel e o brilho das bordas.
 - A exportação transparente agora preserva o alfa calculado pela composição SDF do próprio vidro, mantendo a silhueta transparente fora do ícone.
 - Shaders WebGL e WebGPU sincronizados.
+
+
+## 19 de novembro de 2026 — alfa correto da superfície de vidro
+
+- A exportação PNG deixa de herdar o alfa da imagem interna, que apagava partes da superfície refrativa.
+- O canal alfa do PNG passa a ser calculado pela cobertura antisserrilhada do SDF do próprio Liquid Glass.
+- Refração, Fresnel e glare continuam no RGB; a silhueta externa fica transparente fora da forma.
+- GLSL/WebGL e WGSL/WebGPU usam a mesma regra de cobertura.
