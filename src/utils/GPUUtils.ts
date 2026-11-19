@@ -26,7 +26,7 @@ class GPUFrameBuffer {
   private createTextures() {
     const color = this.device.createTexture({
       size: [this.width, this.height],
-      format: 'rgba16float',
+      format: 'rgba8unorm',
       usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     });
     const depth = this.device.createTexture({
