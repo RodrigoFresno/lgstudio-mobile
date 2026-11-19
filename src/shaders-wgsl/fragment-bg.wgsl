@@ -92,12 +92,12 @@ fn fs_main(@builtin(position) frag_coord: vec4f, @location(0) v_uv: vec2f) -> @l
   // v_uv has y=0 at top (WebGPU convention); compute GLSL-style uv with y=0 at bottom
   let gl_uv = vec2f(v_uv.x, 1.0 - v_uv.y);
 
-  if (u.u_bgType <= 0) {
-    // Match WebGL: keep the checkerboard in preview, but use a clean backing
-    // for transparent PNG export; the final silhouette mask writes alpha.
-    if (u.u_exportTransparent == 1) {
-      bgColor = vec3f(1.0);
-    } else {
+  if (u.u_exportTransparent == 1) {
+    // Export the glass against a neutral source, never the user's preview background.
+    bgColor = vec3f(0.82);
+  } else if (u.u_bgType <= 0) {
+    // Keep the checkerboard only in the editor preview.
+    {
       bgColor = vec3f(1.0 - chessboard(pixel / u.u_dpr, 20.0, 2) / 4.0);
     }
   } else if (u.u_bgType <= 1) {
