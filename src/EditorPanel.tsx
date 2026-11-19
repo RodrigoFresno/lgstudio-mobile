@@ -119,7 +119,7 @@ export function EditorPanel(props: Props) {
           <strong>lgStudio</strong>
           <span>Editor de ícones Liquid Glass</span>
         </div>
-        <span className={styles.liveDot}>LIVE</span>
+        <span className={styles.liveDot}>AO VIVO</span>
       </div>
 
       <section className={styles.section}>
