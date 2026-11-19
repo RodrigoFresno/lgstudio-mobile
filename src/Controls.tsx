@@ -2,7 +2,6 @@ import { useControls, folder, Leva } from 'leva';
 import { LevaVectorNew } from './components/LevaVectorNew/LevaVectorNew';
 // import { LevaImageUpload } from './components/LevaImageUpload/LevaImageUpload';
 import { LevaContainer } from './components/LevaContainer/LevaContainer';
-import { LevaCheckButtons } from './components/LevaCheckButtons';
 import { useLayoutEffect } from 'react';
 import languages from './utils/languages';
 
