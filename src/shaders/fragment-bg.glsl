@@ -78,12 +78,12 @@ void main() {
   // float chessboardBg = chessboard(gl_FragCoord.xy, 14.0);
   vec3 bgColor = vec3(1.0);
 
-  if (u_bgType <= 0) {
-    // Keep the checkerboard in the editor preview, but never bake it into a
-    // transparent PNG export. The export mask creates the actual alpha channel.
-    if (u_exportTransparent == 1) {
-      bgColor = vec3(1.0);
-    } else {
+  if (u_exportTransparent == 1) {
+    // Export the glass against a neutral source, never the user's preview background.
+    bgColor = vec3(0.82);
+  } else if (u_bgType <= 0) {
+    // Keep the checkerboard only in the editor preview.
+    {
       bgColor = vec3(1.0 - chessboard(gl_FragCoord.xy / u_dpr, 20.0, 2) / 4.0);
     }
   } else if (u_bgType <= 1) {
