@@ -39,7 +39,8 @@ struct Uniforms {
   u_iconRect: vec4f,
   u_iconOpacity: f32,
   u_iconReady: i32,
-  _pad2: vec2f,
+  _pad2: f32,
+  u_exportTransparent: i32,
 };
 
 @group(0) @binding(0) var<uniform> u: Uniforms;
@@ -92,7 +93,13 @@ fn fs_main(@builtin(position) frag_coord: vec4f, @location(0) v_uv: vec2f) -> @l
   let gl_uv = vec2f(v_uv.x, 1.0 - v_uv.y);
 
   if (u.u_bgType <= 0) {
-    bgColor = vec3f(1.0 - chessboard(pixel / u.u_dpr, 20.0, 2) / 4.0);
+    // Match WebGL: keep the checkerboard in preview, but use a clean backing
+    // for transparent PNG export; the final silhouette mask writes alpha.
+    if (u.u_exportTransparent == 1) {
+      bgColor = vec3f(1.0);
+    } else {
+      bgColor = vec3f(1.0 - chessboard(pixel / u.u_dpr, 20.0, 2) / 4.0);
+    }
   } else if (u.u_bgType <= 1) {
     if (gl_uv.x < 0.5 && gl_uv.y > 0.5) {
       bgColor = vec3f(chessboard(pixel / u.u_dpr, 10.0, 0));
