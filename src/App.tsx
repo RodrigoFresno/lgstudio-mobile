@@ -477,8 +477,6 @@ function App() {
     const originalPosition = { ...shapePositionRef.current };
     const originalMode = interactionMode;
     const widthScale = (exportSize * 0.82) / Math.max(controls.shapeWidth, controls.shapeHeight);
-    const outputShapeWidth = controls.shapeWidth * widthScale;
-    const outputShapeHeight = controls.shapeHeight * widthScale;
 
     try {
       const gl = canvasEl.getContext('webgl2');
