@@ -564,8 +564,9 @@ export class GPUMultiPassRenderer implements IMultiPassRenderer {
     f32[44] = uniforms.u_iconOpacity ?? 1;
     // u_iconReady (offset 180)
     i32[45] = uniforms.u_iconReady ?? 0;
-    // _pad2 (offset 184)
-    f32[46] = 0; f32[47] = 0;
+    // _pad2 (offset 184) + u_exportTransparent (offset 188)
+    f32[46] = 0;
+    i32[47] = uniforms.u_exportTransparent ?? 0;
 
     const buffer = this.device.createBuffer({
       size: BUFFER_SIZE,
