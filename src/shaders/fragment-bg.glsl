@@ -19,6 +19,7 @@ uniform float u_shadowExpand;
 uniform float u_shadowFactor;
 uniform vec2 u_shadowPosition;
 uniform int u_bgType;
+uniform int u_exportTransparent;
 uniform sampler2D u_bgTexture;
 uniform sampler2D u_iconTexture;
 uniform float u_bgTextureRatio;
@@ -78,8 +79,13 @@ void main() {
   vec3 bgColor = vec3(1.0);
 
   if (u_bgType <= 0) {
-    // chessboard
-    bgColor = vec3(1.0 - chessboard(gl_FragCoord.xy / u_dpr, 20.0, 2) / 4.0);
+    // Keep the checkerboard in the editor preview, but never bake it into a
+    // transparent PNG export. The export mask creates the actual alpha channel.
+    if (u_exportTransparent == 1) {
+      bgColor = vec3(1.0);
+    } else {
+      bgColor = vec3(1.0 - chessboard(gl_FragCoord.xy / u_dpr, 20.0, 2) / 4.0);
+    }
   } else if (u_bgType <= 1) {
     if (v_uv.x < 0.5 && v_uv.y > 0.5) {
       bgColor = vec3(chessboard(gl_FragCoord.xy / u_dpr, 10.0, 0));
