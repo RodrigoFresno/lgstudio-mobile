@@ -149,10 +149,11 @@ function App() {
 
   // WebGPU detection
   const [webgpuDetect, setWebgpuDetect] = useState<WebGPUDetectResult | null>(null);
-  const [rendererBackend, setRendererBackend] = useState<'webgl' | 'webgpu'>('webgl');
+  // O renderizador WebGL é selecionado automaticamente para manter a mesma saída em desktop e celular.
+  const rendererBackend: 'webgl' | 'webgpu' = 'webgl';
   // Incrementing key forces React to remount the <canvas>, giving us a fresh element
   // with no prior context (needed because WebGL/WebGPU contexts are mutually exclusive)
-  const [canvasKey, setCanvasKey] = useState(0);
+  const canvasKey = 0;
 
   useEffect(() => {
     detectWebGPU().then(setWebgpuDetect);
