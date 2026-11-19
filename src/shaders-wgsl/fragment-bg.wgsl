@@ -97,13 +97,8 @@ fn fs_main(@builtin(position) frag_coord: vec4f, @location(0) v_uv: vec2f) -> @l
     // Export mode ignores the preview background; the canvas remains transparent.
     bgColor = vec3f(1.0);
   } else if (u.u_bgType <= 0) {
-    // Match WebGL: keep the checkerboard in preview, but use a clean backing
-    // for transparent PNG export; the final silhouette mask writes alpha.
-    if (u.u_exportTransparent == 1) {
-      bgColor = vec3f(1.0);
-    } else {
-      bgColor = vec3f(1.0 - chessboard(pixel / u.u_dpr, 20.0, 2) / 4.0);
-    }
+    // Checkerboard exists only in the live preview.
+    bgColor = vec3f(1.0 - chessboard(pixel / u.u_dpr, 20.0, 2) / 4.0);
   } else if (u.u_bgType <= 1) {
     if (gl_uv.x < 0.5 && gl_uv.y > 0.5) {
       bgColor = vec3f(chessboard(pixel / u.u_dpr, 10.0, 0));
