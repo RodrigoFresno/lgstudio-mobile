@@ -541,7 +541,8 @@ function App() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(url);
+      // Keep the Blob URL alive until the browser has started the download.
+      window.setTimeout(() => URL.revokeObjectURL(url), 30000);
     } catch (error) {
       console.error('Falha ao exportar ícone:', error);
       window.alert(error instanceof Error ? error.message : 'Não foi possível exportar o ícone.');
