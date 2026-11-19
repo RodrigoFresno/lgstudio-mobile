@@ -83,9 +83,7 @@ void main() {
     bgColor = vec3(0.82);
   } else if (u_bgType <= 0) {
     // Keep the checkerboard only in the editor preview.
-    {
-      bgColor = vec3(1.0 - chessboard(gl_FragCoord.xy / u_dpr, 20.0, 2) / 4.0);
-    }
+    bgColor = vec3(1.0 - chessboard(gl_FragCoord.xy / u_dpr, 20.0, 2) / 4.0);
   } else if (u_bgType <= 1) {
     if (v_uv.x < 0.5 && v_uv.y > 0.5) {
       bgColor = vec3(chessboard(gl_FragCoord.xy / u_dpr, 10.0, 0));
