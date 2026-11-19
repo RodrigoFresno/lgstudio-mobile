@@ -159,14 +159,6 @@ function App() {
   }, []);
 
   const { controls, lang, langName, levaGlobal, controlsAPI } = useLevaControls({
-    rendererOptions: {
-      webgpuSupported: webgpuDetect?.supported ?? false,
-      webgpuUnavailableReason: webgpuDetect?.reason,
-      onRendererChange: (backend) => {
-        setRendererBackend(backend);
-        setCanvasKey((k) => k + 1);
-      },
-    },
     containerRender: {
       /* eslint-disable react-hooks/rules-of-hooks */
       bgType: ({ value, setValue }) => {
