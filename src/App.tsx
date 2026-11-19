@@ -487,6 +487,13 @@ function App() {
     const outputShapeHeight = controls.shapeHeight * widthScale;
 
     try {
+      const gl = canvasEl.getContext('webgl2');
+      const maxTextureSize = stateRef.current.rendererBackend === 'webgpu'
+        ? stateRef.current.gpuDevice?.limits.maxTextureDimension2D
+        : gl?.getParameter(gl.MAX_TEXTURE_SIZE);
+      if (maxTextureSize && exportSize > maxTextureSize) {
+        throw new Error(`A resolução escolhida excede o limite deste dispositivo (${maxTextureSize}px).`);
+      }
       stateRef.current.renderScale = widthScale;
       stateRef.current.blurWeights = computeGaussianKernelByRadius(Math.min(200, controls.blurRadius * widthScale));
       // Export always ignores preview backgrounds, regardless of the selected thumbnail.
