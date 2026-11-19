@@ -152,6 +152,8 @@ vec4 getTextureDispersion(
   pixel.r = mix(bgR, blurR, mixRate);
   pixel.g = mix(bgG, blurG, mixRate);
   pixel.b = mix(bgB, blurB, mixRate);
+  // Preserve the export alpha channel from the background texture.
+  pixel.a = texture(tex1, v_uv).a;
 
   return pixel;
 }
