@@ -271,12 +271,12 @@ export class FrameBuffer {
     gl.texImage2D(
       gl.TEXTURE_2D,
       0,
-      gl.RGBA16F,
+      gl.RGBA8,
       this.width,
       this.height,
       0,
       gl.RGBA,
-      gl.FLOAT,
+      gl.UNSIGNED_BYTE,
       null
     );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
