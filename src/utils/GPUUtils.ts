@@ -111,7 +111,7 @@ class GPURenderPassObj {
       code: config.shader.vertex + '\n' + config.shader.fragment,
     });
 
-    const outputFormat = config.outputToScreen ? canvasFormat : 'rgba16float' as GPUTextureFormat;
+    const outputFormat = config.outputToScreen ? canvasFormat : 'rgba8unorm' as GPUTextureFormat;
 
     this.pipeline = device.createRenderPipeline({
       layout: device.createPipelineLayout({
