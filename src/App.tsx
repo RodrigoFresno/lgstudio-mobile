@@ -514,19 +514,12 @@ function App() {
       const ctx = output.getContext('2d');
       if (!ctx) throw new Error('Não foi possível criar a imagem de exportação.');
 
-      // Draw only the glass silhouette. The canvas starts transparent, so
-      // pixels outside the path remain genuine PNG alpha without a checkerboard.
-      ctx.save();
-      ctx.beginPath();
-      if (shapePreset === 'circle') {
-        ctx.ellipse(exportSize / 2, exportSize / 2, outputShapeWidth / 2, outputShapeHeight / 2, 0, 0, Math.PI * 2);
-      } else {
-        const radius = (Math.min(outputShapeWidth, outputShapeHeight) / 2) * (controls.shapeRadius / 100);
-        traceSuperellipseShape(ctx, exportSize / 2, exportSize / 2, outputShapeWidth, outputShapeHeight, radius, controls.shapeRoundness);
-      }
-      ctx.clip();
+      // Export the renderer's own frame without applying a second geometric
+      // mask. The SDF/Liquid Glass shader already defines the exact silhouette
+      // and its antialiased edge; clipping again with a Canvas2D path changes
+      // the corner curvature and cuts the refraction/glare differently.
+      ctx.clearRect(0, 0, exportSize, exportSize);
       ctx.drawImage(canvasEl, 0, 0, exportSize, exportSize);
-      ctx.restore();
 
       const blob = await new Promise<Blob>((resolve, reject) => {
         output.toBlob((value) => value ? resolve(value) : reject(new Error('O navegador não conseguiu gerar o PNG.')), 'image/png');
