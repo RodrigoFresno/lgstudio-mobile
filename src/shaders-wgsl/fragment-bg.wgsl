@@ -132,7 +132,9 @@ fn fs_main(@builtin(position) frag_coord: vec4f, @location(0) v_uv: vec2f) -> @l
       let iconPixel = textureSampleLevel(u_iconTexture, u_sampler, iconUv, 0.0);
       let glassMask = 1.0 - smoothstep(-shapeEdgeAa, shapeEdgeAa, shapeDistance);
       let artworkAlpha = iconPixel.a * clamp(u.u_iconOpacity, 0.0, 1.0) * glassMask;
-      bgColor = mix(bgColor, iconPixel.rgb, artworkAlpha);
+      // Keep source RGB independent from the transparent preview backing.
+      // Mixing against white here creates a pale fringe around antialiased edges.
+      bgColor = iconPixel.rgb;
       bgAlpha = artworkAlpha;
     }
   }
