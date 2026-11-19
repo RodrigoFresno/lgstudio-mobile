@@ -36,6 +36,7 @@ uniform float u_glareHardness;
 uniform float u_glareAngle;
 uniform int u_blurEdge;
 uniform int u_showShape1;
+uniform int u_exportTransparent;
 
 uniform int STEP;
 
@@ -583,5 +584,9 @@ void main() {
 
   }
 
+  if (u_exportTransparent == 1) {
+    // WebGL canvases use premultiplied alpha; keep exported pixels valid.
+    outColor.rgb *= outColor.a;
+  }
   fragColor = outColor;
 }
