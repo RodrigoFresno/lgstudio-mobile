@@ -112,11 +112,11 @@ function traceSuperellipseShape(
 
 function getInitialCanvasSize() {
   const mobile = window.innerWidth <= 760;
-  const availableWidth = window.innerWidth - (mobile ? 32 : 720);
-  const availableHeight = window.innerHeight - (mobile ? 360 : 150);
+  const availableWidth = window.innerWidth - (mobile ? 32 : 80);
+  const availableHeight = window.innerHeight * 0.58 - (mobile ? 80 : 110);
   // No celular, o canvas fica compacto na faixa de prévia entre o cabeçalho
   // dos controles e a gaveta inferior, sem ficar escondido atrás dela.
-  return Math.max(mobile ? 150 : 480, Math.min(availableWidth, availableHeight, mobile ? window.innerWidth * 0.58 : Infinity));
+  return Math.max(mobile ? 140 : 280, Math.min(availableWidth, availableHeight, mobile ? window.innerWidth * 0.72 : window.innerHeight * 0.52));
 }
 
 function App() {
@@ -595,7 +595,7 @@ function App() {
       x: window.innerWidth / 2 - size.width / 2,
       // Reserva a metade inferior para os controles e mantém o ícone visível
       // na área de trabalho superior em telas de celular.
-      y: (mobile ? window.innerHeight * 0.385 : window.innerHeight / 2) - size.height / 2,
+      y: (mobile ? window.innerHeight * 0.28 : window.innerHeight * 0.29) - size.height / 2,
     });
   }, []);
 
@@ -1064,7 +1064,6 @@ function App() {
 
   return (
     <>
-      {levaGlobal}
       <header className={styles.header}>
         <div className={styles.logoWrapper}>
           <div className={styles.title}>lgStudio</div>
@@ -1090,6 +1089,7 @@ function App() {
           </a>
         </div>
       </header>
+      <div className={styles.settingsDock}>
       <EditorPanel
         controls={controls}
         controlsAPI={controlsAPI}
@@ -1113,11 +1113,13 @@ function App() {
         onExport={handleExport}
         isExporting={isExporting}
       />
+      {levaGlobal}
       <PresetControls
         controls={controls}
         controlsAPI={controlsAPI}
         lang={lang}
       />
+      </div>
       <ResizableWindow
         disableMove
         className={isExporting ? styles.exportingWindow : undefined}
