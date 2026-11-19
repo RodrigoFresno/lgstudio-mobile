@@ -8,3 +8,10 @@
 - Captura da imagem somente após a conclusão da renderização da GPU.
 - Interface padronizada em português brasileiro.
 - Prévia mantida na parte superior e controles reunidos em um único painel inferior rolável.
+
+
+## 19 de novembro de 2026 — ajuste do efeito Liquid Glass na exportação
+
+- Removido o limite de alfa baseado na textura borrada, que apagava a refração, o Fresnel e o brilho das bordas.
+- A exportação transparente agora preserva o alfa calculado pela composição SDF do próprio vidro, mantendo a silhueta transparente fora do ícone.
+- Shaders WebGL e WebGPU sincronizados.
