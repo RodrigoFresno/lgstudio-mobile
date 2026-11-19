@@ -147,7 +147,7 @@ fn fs_main(@builtin(position) frag_coord: vec4f, @location(0) v_uv: vec2f) -> @l
   let shadow = exp(-1.0 / u.u_shadowExpand * abs(merged) * u_resolution1x.y) * 0.6 * u.u_shadowFactor;
 
   if (u.u_exportTransparent == 1) {
-    return vec4f(0.0, 0.0, 0.0, clamp(shadow, 0.0, 1.0));
+    return vec4f(bgColor, 0.0);
   }
   return vec4f(bgColor - vec3f(shadow), 1.0);
 }
