@@ -489,9 +489,6 @@ function App() {
     try {
       stateRef.current.renderScale = widthScale;
       stateRef.current.blurWeights = computeGaussianKernelByRadius(Math.min(200, controls.blurRadius * widthScale));
-      // bgType 0 is the checkerboard transparency preview. During export,
-      // replace that preview with a clean white backing; the silhouette mask
-      // below converts everything outside the icon into real PNG alpha.
       // Export always ignores preview backgrounds, regardless of the selected thumbnail.
       stateRef.current.activeRenderer?.setUniform('u_exportTransparent', 1);
       const centered = { x: exportSize / 2, y: exportSize / 2 };
