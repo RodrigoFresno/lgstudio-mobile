@@ -2,7 +2,6 @@ import { useControls, folder, Leva } from 'leva';
 import { LevaVectorNew } from './components/LevaVectorNew/LevaVectorNew';
 // import { LevaImageUpload } from './components/LevaImageUpload/LevaImageUpload';
 import { LevaContainer } from './components/LevaContainer/LevaContainer';
-import { useLayoutEffect } from 'react';
 import languages from './utils/languages';
 
 export const useLevaControls = ({
@@ -156,7 +155,7 @@ export const useLevaControls = ({
       //   // alphaPatternColorA: '#bbb',
       //   // alphaPatternColorB: '#eee',
       // }),
-      ['shapeSettings']: folder({
+      [lang['editor.shapeSettings']]: folder({
         shapeWidth: {
           label: lang['editor.shapeWidth'],
           min: 20,
@@ -208,7 +207,7 @@ export const useLevaControls = ({
       }, {
         collapsed: true
       }),
-      ['debugSettings']: folder({
+      [lang['editor.debugSettings']]: folder({
         step: {
           label: 'Etapa de diagnóstico',
           value: 9,
@@ -222,34 +221,6 @@ export const useLevaControls = ({
     }),
     [],
   );
-
-  useLayoutEffect(() => {
-    const levaRoot = document.querySelector('.settingsDock [class^=leva]');
-    if (!levaRoot) {
-      return;
-    }
-
-    setTimeout(() => {
-      const controlEls = (levaRoot.lastChild as HTMLDivElement).querySelectorAll(':scope > div > div');
-      controlEls.forEach((el) => {
-        const ctrlEl = el as HTMLDivElement;
-        const styleStr = ctrlEl.getAttribute('style');
-        if (styleStr && styleStr.includes('folder')) {
-          // get title str:
-          const titleEl = ctrlEl.querySelector(':scope > div > svg + div') as HTMLDivElement;
-          if (!titleEl) {
-            return;
-          }
-          const titleStr = titleEl.innerText;
-          ctrlEl.style.setProperty(
-            '--i18n-name',
-            `"${lang[`editor.${titleStr}` as keyof Omit<typeof lang, '_settings'>] ?? titleStr}"`,
-          );
-          ctrlEl.dataset.levaFolder = '1';
-        }
-      });
-    }, 0);
-  }, []);
 
   const levaGlobal = (
     <Leva
