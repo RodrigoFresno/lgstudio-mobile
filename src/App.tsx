@@ -492,7 +492,7 @@ function App() {
       // bgType 0 is the checkerboard transparency preview. During export,
       // replace that preview with a clean white backing; the silhouette mask
       // below converts everything outside the icon into real PNG alpha.
-      stateRef.current.activeRenderer?.setUniform('u_exportTransparent', controls.bgType === 0 ? 1 : 0);
+      // Export always ignores preview backgrounds, regardless of the selected thumbnail.\n      stateRef.current.activeRenderer?.setUniform('u_exportTransparent', 1);
       const centered = { x: exportSize / 2, y: exportSize / 2 };
       shapePositionRef.current = centered;
       setShapePosition(centered);
@@ -500,7 +500,7 @@ function App() {
       stateRef.current.canvasPointerPos = pointer;
       stateRef.current.mouseSpring.set(pointer);
       setCanvasInfo({ width: exportSize, height: exportSize, dpr: 1 });
-      await waitForFrames(4);
+      await waitForFrames(4);\n      // Wait for GPU work to finish before reading the canvas. This avoids\n      // capturing an unfinished/black frame at high resolutions.\n      if (stateRef.current.rendererBackend === 'webgpu') {\n        await stateRef.current.gpuDevice?.queue.onSubmittedWorkDone();\n      } else {\n        canvasEl.getContext('webgl2')?.finish();\n      }
 
       const output = document.createElement('canvas');
       output.width = exportSize;
@@ -541,7 +541,7 @@ function App() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1500);
     } catch (error) {
       console.error('Falha ao exportar ícone:', error);
       window.alert(error instanceof Error ? error.message : 'Não foi possível exportar o ícone.');
@@ -1064,7 +1064,7 @@ function App() {
         </div>
         <div className={styles.content}>
           <span>
-            by <a>iyinchao</a>
+            por <a>iyinchao</a>
           </span>
           <a
             href="https://github.com/iyinchao/liquid-glass-studio"
