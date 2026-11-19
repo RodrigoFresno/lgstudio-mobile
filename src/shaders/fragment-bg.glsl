@@ -122,9 +122,7 @@ void main() {
       vec4 iconPixel = texture(u_iconTexture, iconUv);
       float glassMask = 1.0 - smoothstep(-shapeEdgeAa, shapeEdgeAa, shapeDistance);
       float artworkAlpha = iconPixel.a * clamp(u_iconOpacity, 0.0, 1.0) * glassMask;
-      // Keep source RGB independent from the transparent preview backing.
-      // Mixing against white here creates a pale fringe around antialiased edges.
-      bgColor = iconPixel.rgb;
+      bgColor = mix(bgColor, iconPixel.rgb, artworkAlpha);
       bgAlpha = artworkAlpha;
     }
   }
