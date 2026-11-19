@@ -231,11 +231,13 @@ fn fs_main(@builtin(position) frag_coord: vec4f, @location(0) v_uv: vec2f) -> @l
   outColor = mix(outColor, textureSampleLevel(u_bg, u_sampler, v_uv, 0.0), smoothstep(-0.001, 0.001, merged));
 
   if (u.u_exportTransparent == 1) {
-    // Preserve alpha from the glass SDF/refraction composition.
-    // Clamping to blurred-artwork alpha erases Fresnel, glare and the glass rim.
-    // The background pass already has zero alpha outside the icon silhouette.
+    // Export alpha follows the glass SDF, not source-artwork alpha.
+    // Transparent pixels in the artwork must not erase the refractive glass.
+    // SDF coverage keeps the outer silhouette antialiased and transparent.
+    let glassAa = max(fwidth(merged), 1.0 / u.u_resolution.y);
+    let glassCoverage = 1.0 - smoothstep(-glassAa, glassAa, merged);
     // WebGPU canvas alphaMode is premultiplied.
-    return vec4f(outColor.rgb * outColor.a, outColor.a);
+    return vec4f(outColor.rgb * glassCoverage, glassCoverage);
   }
   return outColor;
 }
