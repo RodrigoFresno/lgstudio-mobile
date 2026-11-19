@@ -77,15 +77,14 @@ void main() {
   vec2 u_resolution1x = u_resolution.xy / u_dpr;
   // float chessboardBg = chessboard(gl_FragCoord.xy, 14.0);
   vec3 bgColor = vec3(1.0);
+  float bgAlpha = 0.0;
 
-  if (u_bgType <= 0) {
-    // Keep the checkerboard in the editor preview, but never bake it into a
-    // transparent PNG export. The export mask creates the actual alpha channel.
-    if (u_exportTransparent == 1) {
-      bgColor = vec3(1.0);
-    } else {
-      bgColor = vec3(1.0 - chessboard(gl_FragCoord.xy / u_dpr, 20.0, 2) / 4.0);
-    }
+  if (u_exportTransparent == 1) {
+    // Export mode: ignore every preview background and retain only the glass/artwork.
+    bgColor = vec3(1.0);
+  } else if (u_bgType <= 0) {
+    // Checkerboard exists only in the live preview.
+    bgColor = vec3(1.0 - chessboard(gl_FragCoord.xy / u_dpr, 20.0, 2) / 4.0);
   } else if (u_bgType <= 1) {
     if (v_uv.x < 0.5 && v_uv.y > 0.5) {
       bgColor = vec3(chessboard(gl_FragCoord.xy / u_dpr, 10.0, 0));
@@ -124,6 +123,7 @@ void main() {
       float glassMask = 1.0 - smoothstep(-shapeEdgeAa, shapeEdgeAa, shapeDistance);
       float artworkAlpha = iconPixel.a * clamp(u_iconOpacity, 0.0, 1.0) * glassMask;
       bgColor = mix(bgColor, iconPixel.rgb, artworkAlpha);
+      bgAlpha = artworkAlpha;
     }
   }
 
@@ -140,5 +140,9 @@ void main() {
 
   float shadow = exp(-1.0 / u_shadowExpand * abs(merged) * u_resolution1x.y) * 0.6 * u_shadowFactor;
 
-  fragColor = vec4(bgColor - vec3(shadow), 1.0);
+  if (u_exportTransparent == 1) {
+    fragColor = vec4(bgColor, bgAlpha);
+  } else {
+    fragColor = vec4(bgColor - vec3(shadow), 1.0);
+  }
 }

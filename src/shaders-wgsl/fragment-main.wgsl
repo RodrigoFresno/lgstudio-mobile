@@ -40,6 +40,11 @@ struct Uniforms {
   u_glareOppositeFactor: f32,
   u_glareFactor: f32,
   u_refDistance: f32,
+  u_iconRect: vec4f,
+  u_iconOpacity: f32,
+  u_iconReady: i32,
+  _pad2: f32,
+  u_exportTransparent: i32,
 };
 
 @group(0) @binding(0) var<uniform> u: Uniforms;
@@ -93,6 +98,8 @@ fn getTextureDispersion(v_uv: vec2f, mixRate: f32, offset: vec2f, factor: f32) -
   pixel.r = mix(bgR, blurR, mixRate);
   pixel.g = mix(bgG, blurG, mixRate);
   pixel.b = mix(bgB, blurB, mixRate);
+  // Preserve alpha from the export background instead of forcing opacity.
+  pixel.a = textureSampleLevel(u_bg, u_sampler, v_uv, 0.0).a;
 
   return pixel;
 }
@@ -223,5 +230,9 @@ fn fs_main(@builtin(position) frag_coord: vec4f, @location(0) v_uv: vec2f) -> @l
   // smooth edge transition
   outColor = mix(outColor, textureSampleLevel(u_bg, u_sampler, v_uv, 0.0), smoothstep(-0.001, 0.001, merged));
 
+  if (u.u_exportTransparent == 1) {
+    // WebGPU canvas alphaMode is premultiplied.
+    return vec4f(outColor.rgb * outColor.a, outColor.a);
+  }
   return outColor;
 }

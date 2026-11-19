@@ -7,8 +7,6 @@ class GPUFrameBuffer {
   private device: GPUDevice;
   private _colorTexture: GPUTexture;
   private _colorView: GPUTextureView;
-  private _depthTexture: GPUTexture;
-  private _depthView: GPUTextureView;
   private width: number;
   private height: number;
 
@@ -16,47 +14,35 @@ class GPUFrameBuffer {
     this.device = device;
     this.width = width;
     this.height = height;
-    const { color, depth } = this.createTextures();
+    const color = this.createTextures();
     this._colorTexture = color;
     this._colorView = color.createView();
-    this._depthTexture = depth;
-    this._depthView = depth.createView();
   }
 
-  private createTextures() {
-    const color = this.device.createTexture({
+  private createTextures(): GPUTexture {
+    // No pass uses depth testing; RGBA8 halves intermediate texture memory.
+    return this.device.createTexture({
       size: [this.width, this.height],
-      format: 'rgba16float',
+      format: 'rgba8unorm',
       usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     });
-    const depth = this.device.createTexture({
-      size: [this.width, this.height],
-      format: 'depth24plus',
-      usage: GPUTextureUsage.RENDER_ATTACHMENT,
-    });
-    return { color, depth };
   }
 
   get colorTexture(): GPUTexture { return this._colorTexture; }
   get colorView(): GPUTextureView { return this._colorView; }
-  get depthView(): GPUTextureView { return this._depthView; }
 
   resize(width: number, height: number): void {
     if (this.width === width && this.height === height) return;
     this._colorTexture.destroy();
-    this._depthTexture.destroy();
     this.width = width;
     this.height = height;
-    const { color, depth } = this.createTextures();
+    const color = this.createTextures();
     this._colorTexture = color;
     this._colorView = color.createView();
-    this._depthTexture = depth;
-    this._depthView = depth.createView();
   }
 
   dispose(): void {
     this._colorTexture.destroy();
-    this._depthTexture.destroy();
   }
 }
 
@@ -111,7 +97,7 @@ class GPURenderPassObj {
       code: config.shader.vertex + '\n' + config.shader.fragment,
     });
 
-    const outputFormat = config.outputToScreen ? canvasFormat : 'rgba16float' as GPUTextureFormat;
+    const outputFormat = config.outputToScreen ? canvasFormat : 'rgba8unorm' as GPUTextureFormat;
 
     this.pipeline = device.createRenderPipeline({
       layout: device.createPipelineLayout({
@@ -248,7 +234,8 @@ export class GPUMultiPassRenderer implements IMultiPassRenderer {
     context.configure({
       device,
       format: this.canvasFormat,
-      alphaMode: 'opaque',
+      // Preserve alpha for transparent PNG exports.
+      alphaMode: 'premultiplied',
     });
 
     this.sampler = device.createSampler({
@@ -565,7 +552,8 @@ export class GPUMultiPassRenderer implements IMultiPassRenderer {
     // u_iconReady (offset 180)
     i32[45] = uniforms.u_iconReady ?? 0;
     // _pad2 (offset 184)
-    f32[46] = 0; f32[47] = 0;
+    f32[46] = 0;
+    i32[47] = uniforms.u_exportTransparent ?? 0;
 
     const buffer = this.device.createBuffer({
       size: BUFFER_SIZE,

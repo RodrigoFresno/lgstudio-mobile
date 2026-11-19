@@ -1,74 +1,21 @@
 import { useControls, folder, Leva } from 'leva';
-import { isChineseLanguage, isUzbekLanguage } from './utils';
 import { LevaVectorNew } from './components/LevaVectorNew/LevaVectorNew';
 // import { LevaImageUpload } from './components/LevaImageUpload/LevaImageUpload';
 import { LevaContainer } from './components/LevaContainer/LevaContainer';
-import { LevaCheckButtons } from './components/LevaCheckButtons';
-import { useLayoutEffect, useMemo, useState } from 'react';
 import languages from './utils/languages';
 
 export const useLevaControls = ({
   containerRender,
-  rendererOptions,
 }: {
   containerRender: {
     bgType: (props: { value: number; setValue: (v: number) => void }) => React.ReactNode;
   };
-  rendererOptions?: {
-    webgpuSupported: boolean;
-    webgpuUnavailableReason?: string;
-    onRendererChange?: (backend: 'webgl' | 'webgpu') => void;
-  };
 }) => {
-  const [langName, setLangName] = useState<keyof typeof languages>(
-    isChineseLanguage() ? 'zh-CN' : isUzbekLanguage() ? 'uz-UZ' : 'en-US',
-  );
-  const lang = useMemo(() => {
-    return languages[langName];
-  }, [langName]);
+  const langName = 'pt-BR' as const;
+  const lang = languages[langName];
 
   const [controls, controlsAPI] = useControls(
     () => ({
-      ['basicSettings']: folder({
-        renderer: LevaCheckButtons({
-          label: lang['editor.renderer'],
-          selected: ['webgl'],
-          options: [
-            { value: 'webgl', label: 'WebGL' },
-            {
-              value: 'webgpu',
-              label: 'WebGPU',
-              disabled: !rendererOptions?.webgpuSupported,
-              title: !rendererOptions?.webgpuSupported
-                ? (rendererOptions?.webgpuUnavailableReason || lang['editor.rendererWebGPUUnavailable'])
-                : undefined,
-            },
-          ],
-          singleMode: true,
-          onClick: (v) => {
-            rendererOptions?.onRendererChange?.(v[0] as 'webgl' | 'webgpu');
-          },
-        }),
-        language: LevaCheckButtons({
-          label: lang['editor.language'],
-          selected: [langName],
-          options: !isChineseLanguage()
-            ? [
-              { value: 'en-US', label: 'English' },
-              { value: 'zh-CN', label: '简体中文' },
-              { value: 'uz-UZ', label: "O'zbekcha" },
-            ]
-            : [
-              { value: 'zh-CN', label: '简体中文' },
-              { value: 'en-US', label: 'English' },
-              { value: 'uz-UZ', label: "O'zbekcha" },
-            ],
-          onClick: (v) => {
-            setLangName((v as (keyof typeof languages)[])[0]);
-          },
-          singleMode: true,
-        }),
-      }),
       refThickness: {
         label: lang['editor.refThickness'],
         min: 1,
@@ -208,7 +155,7 @@ export const useLevaControls = ({
       //   // alphaPatternColorA: '#bbb',
       //   // alphaPatternColorB: '#eee',
       // }),
-      ['shapeSettings']: folder({
+      [lang['editor.shapeSettings']]: folder({
         shapeWidth: {
           label: lang['editor.shapeWidth'],
           min: 20,
@@ -260,9 +207,9 @@ export const useLevaControls = ({
       }, {
         collapsed: true
       }),
-      ['debugSettings']: folder({
+      [lang['editor.debugSettings']]: folder({
         step: {
-          label: 'Show Step',
+          label: 'Etapa de diagnóstico',
           value: 9,
           min: 0,
           max: 9,
@@ -272,36 +219,8 @@ export const useLevaControls = ({
         collapsed: true
       }),
     }),
-    [langName, rendererOptions?.webgpuSupported],
+    [],
   );
-
-  useLayoutEffect(() => {
-    const levaRoot = document.querySelector('#root>[class^=leva]');
-    if (!levaRoot) {
-      return;
-    }
-
-    setTimeout(() => {
-      const controlEls = (levaRoot.lastChild as HTMLDivElement).querySelectorAll('&>div>div');
-      controlEls.forEach((el) => {
-        const ctrlEl = el as HTMLDivElement;
-        const styleStr = ctrlEl.getAttribute('style');
-        if (styleStr && styleStr.includes('folder')) {
-          // get title str:
-          const titleEl = ctrlEl.querySelector('&>div>svg+div') as HTMLDivElement;
-          if (!titleEl) {
-            return;
-          }
-          const titleStr = titleEl.innerText;
-          ctrlEl.style.setProperty(
-            '--i18n-name',
-            `"${lang[`editor.${titleStr}` as keyof Omit<typeof lang, '_settings'>] ?? titleStr}"`,
-          );
-          ctrlEl.dataset.levaFolder = '1';
-        }
-      });
-    }, 0);
-  }, [lang]);
 
   const levaGlobal = (
     <Leva

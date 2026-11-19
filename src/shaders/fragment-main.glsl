@@ -36,6 +36,7 @@ uniform float u_glareHardness;
 uniform float u_glareAngle;
 uniform int u_blurEdge;
 uniform int u_showShape1;
+uniform int u_exportTransparent;
 
 uniform int STEP;
 
@@ -152,6 +153,8 @@ vec4 getTextureDispersion(
   pixel.r = mix(bgR, blurR, mixRate);
   pixel.g = mix(bgG, blurG, mixRate);
   pixel.b = mix(bgB, blurB, mixRate);
+  // Preserve the export alpha channel from the background texture.
+  pixel.a = texture(tex1, v_uv).a;
 
   return pixel;
 }
@@ -581,5 +584,9 @@ void main() {
 
   }
 
+  if (u_exportTransparent == 1) {
+    // WebGL canvases use premultiplied alpha; keep exported pixels valid.
+    outColor.rgb *= outColor.a;
+  }
   fragColor = outColor;
 }

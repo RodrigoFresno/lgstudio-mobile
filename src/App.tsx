@@ -112,11 +112,11 @@ function traceSuperellipseShape(
 
 function getInitialCanvasSize() {
   const mobile = window.innerWidth <= 760;
-  const availableWidth = window.innerWidth - (mobile ? 32 : 720);
-  const availableHeight = window.innerHeight - (mobile ? 360 : 150);
+  const availableWidth = window.innerWidth - (mobile ? 32 : 80);
+  const availableHeight = window.innerHeight * 0.58 - (mobile ? 80 : 110);
   // No celular, o canvas fica compacto na faixa de prévia entre o cabeçalho
   // dos controles e a gaveta inferior, sem ficar escondido atrás dela.
-  return Math.max(mobile ? 150 : 480, Math.min(availableWidth, availableHeight, mobile ? window.innerWidth * 0.58 : Infinity));
+  return Math.max(mobile ? 140 : 280, Math.min(availableWidth, availableHeight, mobile ? window.innerWidth * 0.72 : window.innerHeight * 0.52));
 }
 
 function App() {
@@ -149,24 +149,18 @@ function App() {
 
   // WebGPU detection
   const [webgpuDetect, setWebgpuDetect] = useState<WebGPUDetectResult | null>(null);
-  const [rendererBackend, setRendererBackend] = useState<'webgl' | 'webgpu'>('webgl');
+  // O renderizador WebGL é selecionado automaticamente para manter a mesma saída em desktop e celular.
+  const getRendererBackend = (): 'webgl' | 'webgpu' => 'webgl';
+  const rendererBackend = getRendererBackend();
   // Incrementing key forces React to remount the <canvas>, giving us a fresh element
   // with no prior context (needed because WebGL/WebGPU contexts are mutually exclusive)
-  const [canvasKey, setCanvasKey] = useState(0);
+  const canvasKey = 0;
 
   useEffect(() => {
     detectWebGPU().then(setWebgpuDetect);
   }, []);
 
   const { controls, lang, langName, levaGlobal, controlsAPI } = useLevaControls({
-    rendererOptions: {
-      webgpuSupported: webgpuDetect?.supported ?? false,
-      webgpuUnavailableReason: webgpuDetect?.reason,
-      onRendererChange: (backend) => {
-        setRendererBackend(backend);
-        setCanvasKey((k) => k + 1);
-      },
-    },
     containerRender: {
       /* eslint-disable react-hooks/rules-of-hooks */
       bgType: ({ value, setValue }) => {
@@ -487,12 +481,17 @@ function App() {
     const outputShapeHeight = controls.shapeHeight * widthScale;
 
     try {
+      const gl = canvasEl.getContext('webgl2');
+      const maxTextureSize = stateRef.current.rendererBackend === 'webgpu'
+        ? stateRef.current.gpuDevice?.limits.maxTextureDimension2D
+        : gl?.getParameter(gl.MAX_TEXTURE_SIZE);
+      if (maxTextureSize && exportSize > maxTextureSize) {
+        throw new Error(`A resolução escolhida excede o limite deste dispositivo (${maxTextureSize}px).`);
+      }
       stateRef.current.renderScale = widthScale;
       stateRef.current.blurWeights = computeGaussianKernelByRadius(Math.min(200, controls.blurRadius * widthScale));
-      // bgType 0 is the checkerboard transparency preview. During export,
-      // replace that preview with a clean white backing; the silhouette mask
-      // below converts everything outside the icon into real PNG alpha.
-      stateRef.current.activeRenderer?.setUniform('u_exportTransparent', controls.bgType === 0 ? 1 : 0);
+      // Export always ignores preview backgrounds, regardless of the selected thumbnail.
+      stateRef.current.activeRenderer?.setUniform('u_exportTransparent', 1);
       const centered = { x: exportSize / 2, y: exportSize / 2 };
       shapePositionRef.current = centered;
       setShapePosition(centered);
@@ -501,6 +500,13 @@ function App() {
       stateRef.current.mouseSpring.set(pointer);
       setCanvasInfo({ width: exportSize, height: exportSize, dpr: 1 });
       await waitForFrames(4);
+      // Wait for GPU work to finish before reading the canvas. This avoids
+      // capturing an unfinished/black frame at high resolutions.
+      if (stateRef.current.rendererBackend === 'webgpu') {
+        await stateRef.current.gpuDevice?.queue.onSubmittedWorkDone();
+      } else {
+        canvasEl.getContext('webgl2')?.finish();
+      }
 
       const output = document.createElement('canvas');
       output.width = exportSize;
@@ -508,28 +514,19 @@ function App() {
       const ctx = output.getContext('2d');
       if (!ctx) throw new Error('Não foi possível criar a imagem de exportação.');
 
-      // Copy the original Liquid Glass renderer, then clip it to the exact icon
-      // silhouette so the exported PNG has transparent outer corners.
-      ctx.drawImage(canvasEl, 0, 0, exportSize, exportSize);
-
-
-      const mask = document.createElement('canvas');
-      mask.width = exportSize;
-      mask.height = exportSize;
-      const maskCtx = mask.getContext('2d');
-      if (!maskCtx) throw new Error('Não foi possível criar a máscara transparente.');
-      maskCtx.fillStyle = '#fff';
-      maskCtx.beginPath();
+      // Draw only the glass silhouette. The canvas starts transparent, so
+      // pixels outside the path remain genuine PNG alpha without a checkerboard.
+      ctx.save();
+      ctx.beginPath();
       if (shapePreset === 'circle') {
-        maskCtx.ellipse(exportSize / 2, exportSize / 2, outputShapeWidth / 2, outputShapeHeight / 2, 0, 0, Math.PI * 2);
+        ctx.ellipse(exportSize / 2, exportSize / 2, outputShapeWidth / 2, outputShapeHeight / 2, 0, 0, Math.PI * 2);
       } else {
         const radius = (Math.min(outputShapeWidth, outputShapeHeight) / 2) * (controls.shapeRadius / 100);
-        traceSuperellipseShape(maskCtx, exportSize / 2, exportSize / 2, outputShapeWidth, outputShapeHeight, radius, controls.shapeRoundness);
+        traceSuperellipseShape(ctx, exportSize / 2, exportSize / 2, outputShapeWidth, outputShapeHeight, radius, controls.shapeRoundness);
       }
-      maskCtx.fill();
-      ctx.globalCompositeOperation = 'destination-in';
-      ctx.drawImage(mask, 0, 0);
-      ctx.globalCompositeOperation = 'source-over';
+      ctx.clip();
+      ctx.drawImage(canvasEl, 0, 0, exportSize, exportSize);
+      ctx.restore();
 
       const blob = await new Promise<Blob>((resolve, reject) => {
         output.toBlob((value) => value ? resolve(value) : reject(new Error('O navegador não conseguiu gerar o PNG.')), 'image/png');
@@ -541,7 +538,7 @@ function App() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1500);
     } catch (error) {
       console.error('Falha ao exportar ícone:', error);
       window.alert(error instanceof Error ? error.message : 'Não foi possível exportar o ícone.');
@@ -587,7 +584,7 @@ function App() {
       x: window.innerWidth / 2 - size.width / 2,
       // Reserva a metade inferior para os controles e mantém o ícone visível
       // na área de trabalho superior em telas de celular.
-      y: (mobile ? window.innerHeight * 0.385 : window.innerHeight / 2) - size.height / 2,
+      y: (mobile ? window.innerHeight * 0.28 : window.innerHeight * 0.29) - size.height / 2,
     });
   }, []);
 
@@ -1056,7 +1053,6 @@ function App() {
 
   return (
     <>
-      {levaGlobal}
       <header className={styles.header}>
         <div className={styles.logoWrapper}>
           <div className={styles.title}>lgStudio</div>
@@ -1064,7 +1060,7 @@ function App() {
         </div>
         <div className={styles.content}>
           <span>
-            by <a>iyinchao</a>
+            por <a>iyinchao</a>
           </span>
           <a
             href="https://github.com/iyinchao/liquid-glass-studio"
@@ -1082,6 +1078,7 @@ function App() {
           </a>
         </div>
       </header>
+      <div className={styles.settingsDock}>
       <EditorPanel
         controls={controls}
         controlsAPI={controlsAPI}
@@ -1105,11 +1102,13 @@ function App() {
         onExport={handleExport}
         isExporting={isExporting}
       />
+      {levaGlobal}
       <PresetControls
         controls={controls}
         controlsAPI={controlsAPI}
         lang={lang}
       />
+      </div>
       <ResizableWindow
         disableMove
         className={isExporting ? styles.exportingWindow : undefined}

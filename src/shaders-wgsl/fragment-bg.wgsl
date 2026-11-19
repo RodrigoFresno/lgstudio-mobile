@@ -86,20 +86,19 @@ fn getCoverUV(uv_in: vec2f, canvasAspect: f32, textureAspect: f32) -> vec2f {
 fn fs_main(@builtin(position) frag_coord: vec4f, @location(0) v_uv: vec2f) -> @location(0) vec4f {
   let u_resolution1x = u.u_resolution / u.u_dpr;
   var bgColor = vec3f(1.0);
+  var bgAlpha = 0.0;
 
   // frag_coord.y is top-down in WebGPU; flip to get GLSL-style bottom-up pixel coords
   let pixel = vec2f(frag_coord.x, u.u_resolution.y - frag_coord.y);
   // v_uv has y=0 at top (WebGPU convention); compute GLSL-style uv with y=0 at bottom
   let gl_uv = vec2f(v_uv.x, 1.0 - v_uv.y);
 
-  if (u.u_bgType <= 0) {
-    // Match WebGL: keep the checkerboard in preview, but use a clean backing
-    // for transparent PNG export; the final silhouette mask writes alpha.
-    if (u.u_exportTransparent == 1) {
-      bgColor = vec3f(1.0);
-    } else {
-      bgColor = vec3f(1.0 - chessboard(pixel / u.u_dpr, 20.0, 2) / 4.0);
-    }
+  if (u.u_exportTransparent == 1) {
+    // Export mode ignores the preview background; the canvas remains transparent.
+    bgColor = vec3f(1.0);
+  } else if (u.u_bgType <= 0) {
+    // Checkerboard exists only in the live preview.
+    bgColor = vec3f(1.0 - chessboard(pixel / u.u_dpr, 20.0, 2) / 4.0);
   } else if (u.u_bgType <= 1) {
     if (gl_uv.x < 0.5 && gl_uv.y > 0.5) {
       bgColor = vec3f(chessboard(pixel / u.u_dpr, 10.0, 0));
@@ -134,6 +133,7 @@ fn fs_main(@builtin(position) frag_coord: vec4f, @location(0) v_uv: vec2f) -> @l
       let glassMask = 1.0 - smoothstep(-shapeEdgeAa, shapeEdgeAa, shapeDistance);
       let artworkAlpha = iconPixel.a * clamp(u.u_iconOpacity, 0.0, 1.0) * glassMask;
       bgColor = mix(bgColor, iconPixel.rgb, artworkAlpha);
+      bgAlpha = artworkAlpha;
     }
   }
 
@@ -143,5 +143,8 @@ fn fs_main(@builtin(position) frag_coord: vec4f, @location(0) v_uv: vec2f) -> @l
   let merged = mainSDF(shadowP1, shadowP2, pixel);
   let shadow = exp(-1.0 / u.u_shadowExpand * abs(merged) * u_resolution1x.y) * 0.6 * u.u_shadowFactor;
 
+  if (u.u_exportTransparent == 1) {
+    return vec4f(bgColor, bgAlpha);
+  }
   return vec4f(bgColor - vec3f(shadow), 1.0);
 }
