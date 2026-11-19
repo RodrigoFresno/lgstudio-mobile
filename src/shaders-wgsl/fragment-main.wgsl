@@ -40,6 +40,11 @@ struct Uniforms {
   u_glareOppositeFactor: f32,
   u_glareFactor: f32,
   u_refDistance: f32,
+  u_iconRect: vec4f,
+  u_iconOpacity: f32,
+  u_iconReady: i32,
+  _pad2: f32,
+  u_exportTransparent: i32,
 };
 
 @group(0) @binding(0) var<uniform> u: Uniforms;
@@ -93,6 +98,8 @@ fn getTextureDispersion(v_uv: vec2f, mixRate: f32, offset: vec2f, factor: f32) -
   pixel.r = mix(bgR, blurR, mixRate);
   pixel.g = mix(bgG, blurG, mixRate);
   pixel.b = mix(bgB, blurB, mixRate);
+  // Preserve alpha from the export background instead of forcing opacity.
+  pixel.a = textureSampleLevel(u_bg, u_sampler, v_uv, 0.0).a;
   // Preserve alpha from the export background instead of forcing opacity.
   pixel.a = textureSampleLevel(u_bg, u_sampler, v_uv, 0.0).a;
 
