@@ -513,28 +513,19 @@ function App() {
       const ctx = output.getContext('2d');
       if (!ctx) throw new Error('Não foi possível criar a imagem de exportação.');
 
-      // Copy the original Liquid Glass renderer, then clip it to the exact icon
-      // silhouette so the exported PNG has transparent outer corners.
-      ctx.drawImage(canvasEl, 0, 0, exportSize, exportSize);
-
-
-      const mask = document.createElement('canvas');
-      mask.width = exportSize;
-      mask.height = exportSize;
-      const maskCtx = mask.getContext('2d');
-      if (!maskCtx) throw new Error('Não foi possível criar a máscara transparente.');
-      maskCtx.fillStyle = '#fff';
-      maskCtx.beginPath();
+      // Draw only the glass silhouette. The canvas starts transparent, so
+      // pixels outside the path remain genuine PNG alpha without a checkerboard.
+      ctx.save();
+      ctx.beginPath();
       if (shapePreset === 'circle') {
-        maskCtx.ellipse(exportSize / 2, exportSize / 2, outputShapeWidth / 2, outputShapeHeight / 2, 0, 0, Math.PI * 2);
+        ctx.ellipse(exportSize / 2, exportSize / 2, outputShapeWidth / 2, outputShapeHeight / 2, 0, 0, Math.PI * 2);
       } else {
         const radius = (Math.min(outputShapeWidth, outputShapeHeight) / 2) * (controls.shapeRadius / 100);
-        traceSuperellipseShape(maskCtx, exportSize / 2, exportSize / 2, outputShapeWidth, outputShapeHeight, radius, controls.shapeRoundness);
+        traceSuperellipseShape(ctx, exportSize / 2, exportSize / 2, outputShapeWidth, outputShapeHeight, radius, controls.shapeRoundness);
       }
-      maskCtx.fill();
-      ctx.globalCompositeOperation = 'destination-in';
-      ctx.drawImage(mask, 0, 0);
-      ctx.globalCompositeOperation = 'source-over';
+      ctx.clip();
+      ctx.drawImage(canvasEl, 0, 0, exportSize, exportSize);
+      ctx.restore();
 
       const blob = await new Promise<Blob>((resolve, reject) => {
         output.toBlob((value) => value ? resolve(value) : reject(new Error('O navegador não conseguiu gerar o PNG.')), 'image/png');
