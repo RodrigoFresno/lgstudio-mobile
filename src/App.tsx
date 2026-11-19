@@ -489,6 +489,10 @@ function App() {
     try {
       stateRef.current.renderScale = widthScale;
       stateRef.current.blurWeights = computeGaussianKernelByRadius(Math.min(200, controls.blurRadius * widthScale));
+      // bgType 0 is the checkerboard transparency preview. During export,
+      // replace that preview with a clean white backing; the silhouette mask
+      // below converts everything outside the icon into real PNG alpha.
+      stateRef.current.activeRenderer?.setUniform('u_exportTransparent', controls.bgType === 0 ? 1 : 0);
       const centered = { x: exportSize / 2, y: exportSize / 2 };
       shapePositionRef.current = centered;
       setShapePosition(centered);
@@ -543,6 +547,7 @@ function App() {
       window.alert(error instanceof Error ? error.message : 'Não foi possível exportar o ícone.');
     } finally {
       stateRef.current.renderScale = 1;
+      stateRef.current.activeRenderer?.setUniform('u_exportTransparent', 0);
       stateRef.current.blurWeights = computeGaussianKernelByRadius(controls.blurRadius);
       setCanvasInfo(originalCanvasInfo);
       shapePositionRef.current = originalPosition;
