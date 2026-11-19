@@ -93,6 +93,8 @@ fn getTextureDispersion(v_uv: vec2f, mixRate: f32, offset: vec2f, factor: f32) -
   pixel.r = mix(bgR, blurR, mixRate);
   pixel.g = mix(bgG, blurG, mixRate);
   pixel.b = mix(bgB, blurB, mixRate);
+  // Preserve alpha from the export background instead of forcing opacity.
+  pixel.a = textureSampleLevel(u_bg, u_sampler, v_uv, 0.0).a;
 
   return pixel;
 }
