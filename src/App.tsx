@@ -492,7 +492,9 @@ function App() {
       // bgType 0 is the checkerboard transparency preview. During export,
       // replace that preview with a clean white backing; the silhouette mask
       // below converts everything outside the icon into real PNG alpha.
-      stateRef.current.activeRenderer?.setUniform('u_exportTransparent', controls.bgType === 0 ? 1 : 0);
+      // Always render the glass over a neutral source during PNG export. The selected
+      // background is for preview/refraction only and must never be baked into the icon.
+      stateRef.current.activeRenderer?.setUniform('u_exportTransparent', 1);
       const centered = { x: exportSize / 2, y: exportSize / 2 };
       shapePositionRef.current = centered;
       setShapePosition(centered);
